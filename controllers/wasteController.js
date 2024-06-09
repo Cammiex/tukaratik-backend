@@ -1,5 +1,19 @@
 const Waste = require('../models/wasteModel');
 const User = require('../models/userModel');
+const multer = require('multer');
+
+const storage = multer.diskStorage({
+    destination: (req, file, cb) => {
+        cb(null, 'uploads/'); // Folder untuk menyimpan file
+    },
+    filename: (req, file, cb) => {
+        cb(null, Date.now() + '-' + file.originalname); // Nama file unik
+    }
+});
+
+const upload = multer({ storage: storage });
+
+exports.upload = upload.single('image');
 
 exports.getAllWaste = (req, res) => {
     Waste.getAll((err, results) => {
@@ -14,9 +28,10 @@ const calculatePoints = (weight) => {
 };
 
 exports.addWaste = (req, res) => {
-    const { user_id, location, address, weight, waste_type, image_url } = req.body;
+    const { user_id, location, address, weight, waste_type } = req.body;
+    const image_url = req.file ? `/uploads/${req.file.filename}` : null;
 
-    if (!user_id || !location || !address || !weight || !waste_type) {
+    if (!user_id || !location || !address || !weight || !waste_type || !image_url) {
         return res.status(400).send('All fields are required');
     }
 
@@ -24,13 +39,13 @@ exports.addWaste = (req, res) => {
 
     Waste.create(user_id, location, address, weight, waste_type, image_url, points_awarded, (err, results) => {
         if (err) return res.status(500).send(err);
-
         res.status(201).send('Waste added successfully');
     });
 };
 
 exports.updateWaste = (req, res) => {
-    const { user_id, location, address, weight, waste_type, image_url, points_awarded, shipping_status } = req.body;
+    const { user_id, location, address, weight, waste_type, points_awarded, shipping_status } = req.body;
+    const image_url = req.file ? `/uploads/${req.file.filename}` : req.body.image_url;
 
     if (!user_id || !location || !address || !weight || !waste_type || !points_awarded || !shipping_status) {
         return res.status(400).send('All fields are required');
@@ -38,7 +53,7 @@ exports.updateWaste = (req, res) => {
 
     Waste.update(req.params.id, user_id, location, address, weight, waste_type, image_url, points_awarded, shipping_status, (err, results) => {
         if (err) return res.status(500).send('Error updating waste');
-        
+
         // Jika status pengiriman selesai, update poin user
         if (shipping_status === 'Completed') {
             Waste.getWasteById(req.params.id, (err, wasteResults) => {

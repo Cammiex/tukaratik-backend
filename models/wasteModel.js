@@ -6,7 +6,7 @@ const Waste = {
         db.query(query, callback);
     },
     create: (user_id, location, address, weight, waste_type, image_url, points_awarded, callback) => {
-        const query = 'INSERT INTO Waste (user_id, location, address, weight, waste_type, image_url, points_awarded, shipping_status, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)';
+        const query = 'INSERT INTO Waste (user_id, location, address, weight, waste_type, image_url, points_awarded, shipping_status, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)';
         db.query(query, [user_id, location, address, weight, waste_type, image_url, points_awarded, 'Pending'], callback);
     },
     update: (id, user_id, location, address, weight, waste_type, image_url, points_awarded, shipping_status, callback) => {
