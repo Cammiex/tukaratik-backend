@@ -1,31 +1,47 @@
+const path = require('path');
 const Product = require('../models/productModel');
-const User = require('../models/userModel');
-const Transaction = require('../models/transactionModel');
 
 exports.getAllProducts = (req, res) => {
-    Product.getAll((err, results) => {
-        if (err) return res.status(500).send(err);
-        res.status(200).json(results);
-    });
+    const { column, order } = req.query;
+    
+    if (column && order) {
+        // Jika ada parameter sorting, panggil fungsi sort
+        Product.sort(column, order, (err, results) => {
+            if (err) return res.status(500).send(err);
+            res.status(200).json(results);
+        });
+    } else {
+        // Jika tidak ada parameter sorting, panggil fungsi getAll
+        Product.getAll((err, results) => {
+            if (err) return res.status(500).send(err);
+            res.status(200).json(results);
+        });
+    }
 };
 
 exports.addProduct = (req, res) => {
-    const { name, description, points_required, stock, weight, image_url } = req.body;
+    const { name, description, points_required, weight, stock } = req.body;
+    const image_path = req.file ? `/uploads/${req.file.filename}` : null;
 
-    if (!name || !points_required || !stock) {
-        return res.status(400).send('Name, points required, and stock are required');
+    if (!name || !points_required || !weight || !stock || !image_path) {
+        return res.status(400).send('All fields are required');
     }
 
-    Product.create(name, description, points_required, stock, weight, image_url, (err, results) => {
+    Product.create(name, description, points_required, weight, stock, image_path, (err, results) => {
         if (err) return res.status(500).send(err);
         res.status(201).send('Product added successfully');
     });
 };
 
 exports.updateProduct = (req, res) => {
-    const { name, description, points_required, stock, weight, image_url } = req.body;
+    const { name, description, points_required, weight, stock } = req.body;
+    const image_path = req.file ? `/uploads/${req.file.filename}` : req.body.image_path;
 
-    Product.update(req.params.id, name, description, points_required, stock, weight, image_url, (err, results) => {
+    if (!name || !points_required || !weight || !stock) {
+        return res.status(400).send('All fields are required');
+    }
+
+    Product.update(req.params.id, name, description, points_required, weight, stock, image_path, (err, results) => {
         if (err) return res.status(500).send(err);
         res.status(200).send('Product updated successfully');
     });
@@ -38,38 +54,69 @@ exports.deleteProduct = (req, res) => {
     });
 };
 
-exports.redeemPoints = (req, res) => {
-    const { userId, productId, quantity } = req.body;
-
-    Product.findById(productId, (err, productResults) => {
+exports.getProductById = (req, res) => {
+    Product.getById(req.params.id, (err, results) => {
         if (err) return res.status(500).send(err);
-        if (productResults.length === 0) return res.status(404).send('Product not found');
+        res.status(200).json(results);
+    });
+};
 
-        const product = productResults[0];
-        const totalPointsRequired = product.points_required * quantity;
+exports.searchProducts = (req, res) => {
+    const { name } = req.query;
+    Product.search(name, (err, results) => {
+        if (err) return res.status(500).send(err);
+        res.status(200).json(results);
+    });
+};
 
-        User.findById(userId, (err, userResults) => {
-            if (err) return res.status(500).send(err);
-            if (userResults.length === 0) return res.status(404).send('User not found');
-            
-            const user = userResults[0];
+exports.sortProducts = (req, res) => {
+    const { column, order } = req.query;
 
-            if (user.total_points < totalPointsRequired) {
-                return res.status(400).send('Insufficient points');
-            }
+    console.log('Sort parameters:', column, order); // Log parameters
 
-            Product.updateStock(productId, quantity, (err, updateResults) => {
-                if (err) return res.status(500).send(err);
+    if (!column || !order) {
+        return res.status(400).send('Column and order parameters are required');
+    }
 
-                User.updatePoints(userId, -totalPointsRequired, (err, updateResults) => {
-                    if (err) return res.status(500).send(err);
+    Product.sort(column, order, (err, results) => {
+        if (err) {
+            console.error('Error in sort:', err); // Log error
+            return res.status(500).send(err);
+        }
+        console.log('Sort results:', results); // Log results
+        res.status(200).json(results);
+    });
+};
 
-                    Transaction.create(userId, productId, quantity, totalPointsRequired, (err, transactionResults) => {
-                        if (err) return res.status(500).send(err);
-                        res.send('Points redeemed and product transaction recorded successfully');
-                    });
-                });
-            });
-        });
+
+exports.updateStock = (req, res) => {
+    const { id } = req.params;
+    const { stock } = req.body;
+
+    if (!id || !stock) {
+        return res.status(400).send('Product ID and stock are required');
+    }
+
+    Product.updateStock(id, stock, (err, results) => {
+        if (err) {
+            console.error(err);
+            return res.status(500).send('Failed to update stock');
+        }
+        res.status(200).send('Stock updated successfully');
+    });
+};
+
+exports.getProductImageById = (req, res) => {
+    const { id } = req.params;
+
+    Product.getById(id, (err, results) => {
+        if (err) return res.status(500).send(err);
+        if (results.length === 0) return res.status(404).send('Product not found');
+
+        const product = results[0];
+        if (!product.image_path) return res.status(404).send('Image not found');
+
+        const imagePath = path.join(__dirname, '..', product.image_path);
+        res.sendFile(imagePath);
     });
 };
