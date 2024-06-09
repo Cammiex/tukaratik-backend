@@ -23,3 +23,37 @@ exports.login = (req, res) => {
         res.status(200).json({ message: 'Login successful', user: { email: user.email, id: user.user_id } });
     });
 };
+
+exports.deleteUser = (req, res) => {
+    const { id } = req.params;
+    User.delete(id, (err, results) => {
+        if (err) return res.status(500).send(err);
+        if (results.affectedRows === 0) return res.status(404).send('User not found');
+        res.status(200).send('User deleted successfully');
+    });
+};
+
+exports.getTotalPointsById = (req, res) => {
+    const { id } = req.params;
+    User.findById(id, (err, results) => {
+        if (err) return res.status(500).send(err);
+        if (results.length === 0) return res.status(404).send('User not found');
+        res.status(200).json({ total_points: results[0].total_points });
+    });
+};
+
+exports.getUserById = (req, res) => {
+    const { id } = req.params;
+    User.findById(id, (err, results) => {
+        if (err) return res.status(500).send(err);
+        if (results.length === 0) return res.status(404).send('User not found');
+        res.status(200).json(results[0]);
+    });
+};
+
+exports.getAllUsers = (req, res) => {
+    User.getAll((err, results) => {
+        if (err) return res.status(500).send(err);
+        res.status(200).json(results);
+    });
+};
