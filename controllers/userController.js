@@ -25,17 +25,14 @@ exports.login = (req, res) => {
 };
 
 exports.deleteUser = (req, res) => {
-    const { id } = req.params;
-    User.delete(id, (err, results) => {
+    User.delete(req.params.id, (err, results) => {
         if (err) return res.status(500).send(err);
-        if (results.affectedRows === 0) return res.status(404).send('User not found');
         res.status(200).send('User deleted successfully');
     });
 };
 
-exports.getTotalPointsById = (req, res) => {
-    const { id } = req.params;
-    User.findById(id, (err, results) => {
+exports.getUserPointsById = (req, res) => {
+    User.findById(req.params.id, (err, results) => {
         if (err) return res.status(500).send(err);
         if (results.length === 0) return res.status(404).send('User not found');
         res.status(200).json({ total_points: results[0].total_points });
@@ -43,8 +40,7 @@ exports.getTotalPointsById = (req, res) => {
 };
 
 exports.getUserById = (req, res) => {
-    const { id } = req.params;
-    User.findById(id, (err, results) => {
+    User.findById(req.params.id, (err, results) => {
         if (err) return res.status(500).send(err);
         if (results.length === 0) return res.status(404).send('User not found');
         res.status(200).json(results[0]);

@@ -17,10 +17,6 @@ const User = {
         const query = 'SELECT * FROM Users WHERE user_id = ?';
         db.query(query, [userId], callback);
     },
-    updatePoints: (userId, points, callback) => {
-        const query = 'UPDATE Users SET total_points = total_points + ? WHERE user_id = ?';
-        db.query(query, [points, userId], callback);
-    },
     delete: (userId, callback) => {
         const query = 'DELETE FROM Users WHERE user_id = ?';
         db.query(query, [userId], callback);
@@ -28,6 +24,14 @@ const User = {
     getAll: (callback) => {
         const query = 'SELECT * FROM Users';
         db.query(query, callback);
+    },
+    getTotalPoints: (userId, callback) => {
+        const query = 'SELECT total_points FROM Users WHERE user_id = ?';
+        db.query(query, [userId], callback);
+    },
+    updatePoints: (userId, points, callback) => {
+        const query = 'UPDATE Users SET total_points = total_points + ? WHERE user_id = ?';
+        db.query(query, [points, userId], callback);
     }
 };
 
