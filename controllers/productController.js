@@ -63,8 +63,15 @@ exports.getProductById = (req, res) => {
 
 exports.searchProducts = (req, res) => {
     const { name } = req.query;
+    if (!name) {
+        return res.status(400).send('Product name is required');
+    }
+
     Product.search(name, (err, results) => {
-        if (err) return res.status(500).send(err);
+        if (err) {
+            console.error('Error searching products:', err);
+            return res.status(500).send(err);
+        }
         res.status(200).json(results);
     });
 };
