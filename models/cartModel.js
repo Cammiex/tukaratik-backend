@@ -13,7 +13,7 @@ const Cart = {
         const query = `
             SELECT p.*, c.quantity, (p.points_required * c.quantity) AS total_points
             FROM cart c
-            JOIN Products p ON c.product_id = p.product_id
+            JOIN products p ON c.product_id = p.product_id
             WHERE c.user_id = ?`;
         db.query(query, [userId], callback);
     },
