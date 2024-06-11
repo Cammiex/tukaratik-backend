@@ -1,10 +1,11 @@
-const mysql = require('mysql');
+const mysql = require('mysql2');
 
 const db = mysql.createConnection({
-    host: process.env.DB_HOST,
-    user: process.env.DB_USER,
-    password: process.env.DB_PASSWORD,
-    database: process.env.DB_NAME
+    host: 'viaduct.proxy.rlwy.net',
+    user: 'root',
+    password: 'SPmRGjTjQxXWHpbfQNvCbMSsKjaYGLBb',
+    database: 'tukaratik',
+    port: 41507
 });
 
 db.connect((err) => {
