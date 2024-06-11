@@ -2,19 +2,19 @@ const db = require('../config/db');
 
 const Order = {
     create: (userId, address, phone, total_points, createdAt, updatedAt, callback) => {
-        const query = 'INSERT INTO Orders (user_id, address, phone, total_points, status, created_at, updated_at) VALUES (?, ?, ?, ?, "packed", ?, ?)';
+        const query = 'INSERT INTO orders (user_id, address, phone, total_points, status, created_at, updated_at) VALUES (?, ?, ?, ?, "packed", ?, ?)';
         db.query(query, [userId, address, phone, total_points, createdAt, updatedAt], callback);
     },
     addOrderItem: (orderId, productId, quantity, callback) => {
-        const query = 'INSERT INTO OrderItems (order_id, product_id, quantity) VALUES (?, ?, ?)';
+        const query = 'INSERT INTO orderitems (order_id, product_id, quantity) VALUES (?, ?, ?)';
         db.query(query, [orderId, productId, quantity], callback);
     },
     updateStatus: (orderId, status, updatedAt, callback) => {
-        const query = 'UPDATE Orders SET status = ?, updated_at = ? WHERE order_id = ?';
+        const query = 'UPDATE orders SET status = ?, updated_at = ? WHERE order_id = ?';
         db.query(query, [status, updatedAt, orderId], callback);
     },
     getOrderById: (orderId, callback) => {
-        const query = 'SELECT * FROM Orders WHERE order_id = ?';
+        const query = 'SELECT * FROM orders WHERE order_id = ?';
         db.query(query, [orderId], callback);
     },
     getOrderHistoryByUser: (userId, callback) => {

@@ -40,7 +40,7 @@ const Product = {
         db.query(query, [stock, id], callback);
     },
     reduceStock: (productId, quantity, callback) => {
-        const query = 'UPDATE Products SET stock = stock - ? WHERE product_id = ?';
+        const query = 'UPDATE products SET stock = stock - ? WHERE product_id = ?';
         db.query(query, [quantity, productId], callback);
     },
 };
