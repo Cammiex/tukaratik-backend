@@ -24,6 +24,30 @@ const Waste = {
     getWasteById: (id, callback) => {
         const query = 'SELECT * FROM Waste WHERE waste_id = ?';
         db.query(query, [id], callback);
+    },
+    getWasteDateById: (id, callback) => {
+        const query = 'SELECT created_at FROM Waste WHERE waste_id = ?';
+        db.query(query, [id], callback);
+    },
+    getWasteAddressById: (id, callback) => {
+        const query = 'SELECT address FROM Waste WHERE waste_id = ?';
+        db.query(query, [id], callback);
+    },
+    getWasteTypeById: (id, callback) => {
+        const query = 'SELECT waste_type FROM Waste WHERE waste_id = ?';
+        db.query(query, [id], callback);
+    },
+    getPointsAwardedById: (id, callback) => {
+        const query = 'SELECT points_awarded FROM Waste WHERE waste_id = ?';
+        db.query(query, [id], callback);
+    },
+    getShippingStatusById: (id, callback) => {
+        const query = 'SELECT shipping_status FROM Waste WHERE waste_id = ?';
+        db.query(query, [id], callback);
+    },
+    getWasteHistoryByUser: (userId, callback) => {
+        const query = 'SELECT created_at, address, waste_type, points_awarded, shipping_status FROM waste WHERE user_id = ? ORDER BY created_at DESC';
+        db.query(query, [userId], callback);
     }
 };
 

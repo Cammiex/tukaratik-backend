@@ -1,6 +1,8 @@
 const Waste = require('../models/wasteModel');
 const User = require('../models/userModel');
 const multer = require('multer');
+const moment = require('moment');
+require('moment/locale/id');
 
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
@@ -18,7 +20,22 @@ exports.upload = upload.single('image');
 exports.getAllWaste = (req, res) => {
     Waste.getAll((err, results) => {
         if (err) return res.status(500).send(err);
+        results.forEach(result => {
+            result.created_at = moment(result.created_at).format('dddd, DD MMMM YYYY');
+            result.updated_at = moment(result.updated_at).format('dddd, DD MMMM YYYY');
+        });
         res.status(200).json(results);
+    });
+};
+
+exports.getWasteById = (req, res) => {
+    Waste.getWasteById(req.params.id, (err, results) => {
+        if (err) return res.status(500).send(err);
+        if (results.length === 0) return res.status(404).send('Waste not found');
+        const waste = results[0];
+        waste.created_at = moment(waste.created_at).format('dddd, DD MMMM YYYY');
+        waste.updated_at = moment(waste.updated_at).format('dddd, DD MMMM YYYY');
+        res.status(200).json(waste);
     });
 };
 
@@ -87,6 +104,10 @@ exports.updateShippingStatus = (req, res) => {
             Waste.getWasteById(req.params.id, (err, wasteResults) => {
                 if (err) return res.status(500).send(err);
 
+                if (!wasteResults || wasteResults.length === 0) {
+                    return res.status(404).send('Waste not found');
+                }
+
                 const waste = wasteResults[0];
                 User.updatePoints(waste.user_id, waste.points_awarded, (err, updateResult) => {
                     if (err) return res.status(500).send('Error updating user points');
@@ -96,5 +117,65 @@ exports.updateShippingStatus = (req, res) => {
         } else {
             res.status(200).send('Shipping status updated successfully');
         }
+    });
+};
+
+
+exports.getWasteDate = (req, res) => {
+    Waste.getWasteById(req.params.id, (err, results) => {
+        if (err) return res.status(500).send(err);
+        if (results.length === 0) return res.status(404).send('Waste not found');
+        const waste = results[0];
+        const formattedDate = moment(waste.created_at).format('dddd, DD MMMM YYYY');
+        res.status(200).json({ date: formattedDate });
+    });
+};
+
+exports.getWasteAddress = (req, res) => {
+    Waste.getWasteById(req.params.id, (err, results) => {
+        if (err) return res.status(500).send(err);
+        const waste = results[0];
+        res.status(200).json({ address: waste.address });
+    });
+};
+
+exports.getWasteType = (req, res) => {
+    Waste.getWasteById(req.params.id, (err, results) => {
+        if (err) return res.status(500).send(err);
+        const waste = results[0];
+        res.status(200).json({ waste_type: waste.waste_type });
+    });
+};
+
+exports.getPointsAwarded = (req, res) => {
+    Waste.getWasteById(req.params.id, (err, results) => {
+        if (err) return res.status(500).send(err);
+        const waste = results[0];
+        res.status(200).json({ points_awarded: waste.points_awarded });
+    });
+};
+
+exports.getShippingStatus = (req, res) => {
+    Waste.getWasteById(req.params.id, (err, results) => {
+        if (err) return res.status(500).send(err);
+        const waste = results[0];
+        res.status(200).json({ shipping_status: waste.shipping_status });
+    });
+};
+
+exports.getWasteHistory = (req, res) => {
+    const userId = req.params.userId; // Assume userId is passed as a parameter
+
+    Waste.getWasteHistoryByUser(userId, (err, wasteHistory) => {
+        if (err) return res.status(500).send(err);
+
+        const formattedHistory = wasteHistory.map(waste => ({
+            description: moment(waste.created_at).format('dddd, Do MMMM YYYY') + ' - ' + waste.address,
+            wasteType: waste.waste_type,
+            pointsAwarded: waste.points_awarded,
+            status: waste.shipping_status
+        }));
+
+        res.status(200).json(formattedHistory);
     });
 };
