@@ -12,7 +12,7 @@ const cartRoutes = require('./routes/cartRoutes');
 const orderRoutes = require('./routes/orderRoutes');
 
 const app = express();
-const port = process.env.PORT || 41507;
+const port = process.env.PORT || 5000;
 
 app.set('trust proxy', 1);
 const allowedOrigins = [
