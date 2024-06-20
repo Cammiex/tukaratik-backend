@@ -17,7 +17,7 @@ const port = process.env.PORT || 5000;
 app.set('trust proxy', 1);
 const allowedOrigins = [
   'http://localhost:3000',
-  'https://url-kalo-sudah-di-deploy.com',
+  'https://tukar-ratik.vercel.app',
 ];
 app.use(
   cors({
